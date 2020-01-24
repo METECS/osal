@@ -15,9 +15,11 @@ void TestSymbolApi(void)
 #ifdef OS_INCLUDE_MODULE_LOADER
     int32  status;
     cpuaddr SymAddress;
+    uint32 module_id;
 
     /* Make the file system */
-    status = OS_mkfs(0,"/ramdev0","RAM",512,2048);
+//    status = OS_mkfs(0,"/ramdev0","RAM",512,2048);
+    status = OS_mkfs(0,"/ramdev0","/ram",512,5000); // Ensure drive is at least the FAT minimum size and volume name starts with /
     UtAssert_True(status == OS_SUCCESS, "status after mkfs = %d",(int)status);
 
     status = OS_mount("/ramdev0","/ram");
@@ -46,6 +48,13 @@ void TestSymbolApi(void)
    status = OS_SymbolTableDump("/ram/SymbolTable512k.dat", 524288);
    UtAssert_True(status == OS_SUCCESS || status == OS_ERR_NOT_IMPLEMENTED,
            "status after 512k OS_SymbolTableDump = %d",(int)status);
+
+   /*
+    * Load the OS_Application_Startup module. Must explicitly load it, even though it's statically linked, to get it in the table
+    * May have to revisit this requirement
+    */
+   status = OS_ModuleLoad(&module_id, "OS_Application_Startup", "/ram/OS_Application_Startup.so");
+   UtAssert_True(status == OS_SUCCESS, "OS_ModuleLoad(&module_id, \"/ram/OS_Application_Startup.so\") = %d",(int)status);
 
    /*
    ** Test the symbol lookup
