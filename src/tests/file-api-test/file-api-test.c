@@ -58,7 +58,8 @@ void TestMkfsMount(void)
     int status;
 
     /* Make the file system */
-    status = OS_mkfs(0,"/ramdev0","RAM",512,200);
+//    status = OS_mkfs(0,"/ramdev0","RAM",512,200);
+    status = OS_mkfs(0,"/ramdev0","/ram",512,5000); // FAT must be larger and start with slash
     UtAssert_True(status == OS_SUCCESS, "status after mkfs = %d",(int)status);
 
     status = OS_mount("/ramdev0","/drive0");
