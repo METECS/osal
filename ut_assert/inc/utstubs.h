@@ -1,11 +1,21 @@
 /*
- *  Copyright (c) 2004-2015, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
@@ -26,9 +36,8 @@
  *
  */
 
-
-#ifndef _UTSTUBS_H_
-#define _UTSTUBS_H_
+#ifndef UTSTUBS_H
+#define UTSTUBS_H
 
 #include <stdarg.h>
 #include "common_types.h"
@@ -46,45 +55,65 @@ typedef cpuaddr UT_EntryKey_t;
 /**
  * Macro to obtain a UT_EntryKey_t value from any function name
  */
-#define UT_KEY(Func)         ((UT_EntryKey_t)&Func)
-
+#define UT_KEY(Func) ((UT_EntryKey_t)&Func)
 
 /**
  * Maximum size of a callback hook context list
  *
  * This is the maximum number of function arguments that can be passed to a hook
+ * Note that OS_TaskCreate() has (possibly) the highest parameter count in OSAL with 7 parameters
  */
-#define UT_STUBCONTEXT_MAXSIZE      4
+#define UT_STUBCONTEXT_MAXSIZE 8
+
+/**
+ * Identifies the type of value stored in the ArgPtr field of a UT_StubContext_t object
+ */
+typedef enum
+{
+    UT_STUBCONTEXT_ARG_TYPE_UNSPECIFIED = 0,
+    UT_STUBCONTEXT_ARG_TYPE_DIRECT,  /**< Indicates "ArgPtr" is a direct copy of the actual parameter value */
+    UT_STUBCONTEXT_ARG_TYPE_INDIRECT /**< Indicates "ArgPtr" is a pointer to the argument value on the stack */
+} UT_StubContext_Arg_Type_t;
+
+/**
+ * Complete Metadata associated with a context argument
+ */
+typedef struct
+{
+    UT_StubContext_Arg_Type_t Type;
+    const char *              Name;
+    size_t                    Size;
+} UT_StubArgMetaData_t;
 
 /**
  * Structure to hold context data for callback hooks
  */
 typedef struct
 {
-    uint32 ArgCount;
-    const void *ArgPtr[UT_STUBCONTEXT_MAXSIZE];
+    uint32               ArgCount;
+    const void *         ArgPtr[UT_STUBCONTEXT_MAXSIZE];
+    UT_StubArgMetaData_t Meta[UT_STUBCONTEXT_MAXSIZE];
 } UT_StubContext_t;
 
 /**
  * Function pointer for user-specified hooks/stub callbacks
  */
 typedef int32 (*UT_HookFunc_t)(void *UserObj, int32 StubRetcode, uint32 CallCount, const UT_StubContext_t *Context);
-typedef int32 (*UT_VaHookFunc_t)(void *UserObj, int32 StubRetcode, uint32 CallCount, const UT_StubContext_t *Context, va_list va);
-
+typedef int32 (*UT_VaHookFunc_t)(void *UserObj, int32 StubRetcode, uint32 CallCount, const UT_StubContext_t *Context,
+                                 va_list va);
 
 /**************************************************************
  * Functions for use within test code implementation
  **************************************************************/
 
 /**
- * Reset the Unit test framework for only the given function
+ * Reset the Unit test framework for a given function, or all functions
  *
  * Any return code or data buffer records for the given function key
- * are cleared.  The special FuncKey value of "0" matches all entries.
+ * are cleared.
  *
  * \param FuncKey The stub function to reset.  If zero, all functions
- *      are reset.  This is basically equivalent to UT_Init() without
- *      changing the Subsys string.
+ *      are reset.
  */
 void UT_ResetState(UT_EntryKey_t FuncKey);
 
@@ -94,7 +123,7 @@ void UT_ResetState(UT_EntryKey_t FuncKey);
  * A deferred ("count down") return code for the stub function will be
  * installed.  The specific implementation depends on the stub function,
  * but typically it will return its default code until it is called "Count"
- * times, after which it will return the given Retcode, then return to
+ * times, where it will return the given Retcode, then return to
  * its default return code again.
  *
  * Multiple deferred entries for a single function are allowed.  These
@@ -120,7 +149,7 @@ void UT_SetDeferredRetcode(UT_EntryKey_t FuncKey, int32 Count, int32 Retcode);
  * Multiple buffer entries for a single function are allowed.  These
  * will be used in the order they were added.
  *
- * It is recommended to call UT_ResetState() at the beginning of the test case
+ * It is recommended to call UT_ResetState(0) at the beginning of the test case
  * to ensure that any old entries for the stub functions are cleared out.
  *
  * \param FuncKey The stub function to add the data buffer to.
@@ -132,7 +161,7 @@ void UT_SetDeferredRetcode(UT_EntryKey_t FuncKey, int32 Count, int32 Retcode);
  *      is false then the DataBuffer pointer is used directly, and must remain valid for the duration
  *      of the current test case.
  */
-void UT_SetDataBuffer(UT_EntryKey_t FuncKey, void *DataBuffer, uint32 BufferSize, bool AllocateCopy);
+void UT_SetDataBuffer(UT_EntryKey_t FuncKey, void *DataBuffer, size_t BufferSize, bool AllocateCopy);
 
 /**
  * Gets the data buffer for a given stub function
@@ -148,30 +177,25 @@ void UT_SetDataBuffer(UT_EntryKey_t FuncKey, void *DataBuffer, uint32 BufferSize
  * \param BufferSize Set to Maximum Size of data buffer (output)
  * \param Position Set to current position in data buffer (output)
  */
-void UT_GetDataBuffer(UT_EntryKey_t FuncKey, void **DataBuffer, uint32 *MaxSize, uint32 *Position);
+void UT_GetDataBuffer(UT_EntryKey_t FuncKey, void **DataBuffer, size_t *MaxSize, size_t *Position);
 
 /**
- * Enable or disable the forced failure mode for the given stub function
- *
- * This triggers a constant failure mode from the stub function, if implemented.
- * The stub function will invoke a given failure path as defined by
- * the stub implementation.
- *
- * A count of the number of times the failure mode is invoked will be maintained.
+ * Set the default return value for the given stub function.
+ * User needs to use UT_ClearDefaultReturnValue to clear the value.
  *
  * \param FuncKey The stub function to add the return code to.
- * \param Value Arbitrary failure mode value (may or may not be used by the stub)
+ * \param Value Arbitrary return value (may or may not be used by the stub)
  */
-void UT_SetForceFail(UT_EntryKey_t FuncKey, int32 Value);
+void UT_SetDefaultReturnValue(UT_EntryKey_t FuncKey, int32 Value);
 
 /**
- * Disable the forced failure mode for the given stub function
+ * Disable the default return for the given stub function
  *
- * This undoes the action of UT_SetForceFail()
+ * This undoes the action of UT_SetDefaultReturnValue()
  *
  * \param FuncKey The stub function entry to clear.
  */
-void UT_ClearForceFail(UT_EntryKey_t FuncKey);
+void UT_ClearDefaultReturnValue(UT_EntryKey_t FuncKey);
 
 /**
  * Set a Hook function for a particular call
@@ -195,7 +219,7 @@ void UT_SetHookFunction(UT_EntryKey_t FuncKey, UT_HookFunc_t HookFunc, void *Use
  * contents of the arguments but the types of arguments aren't known.
  *
  * However, some systems have limited support for va_list, so this might not be
- * available on those systems.  Tests should use the generic (non-va) hook function 
+ * available on those systems.  Tests should use the generic (non-va) hook function
  * unless the arguments are truly necessary.
  *
  * \param FuncKey  The stub function to add the hook to.
@@ -224,8 +248,6 @@ bool UT_GetStubRetcodeAndCount(UT_EntryKey_t FuncKey, int32 *Retcode, int32 *Cou
  * \return The number of times the stub was invoked
  */
 uint32 UT_GetStubCount(UT_EntryKey_t FuncKey);
-
-
 
 /**************************************************************
  * Functions for use within stub function implementation
@@ -264,16 +286,16 @@ void UT_Stub_CallOnce(void (*Func)(void));
 bool UT_Stub_CheckDeferredRetcode(UT_EntryKey_t FuncKey, int32 *Retcode);
 
 /**
- * Check for a forced failure mode entry for the given stub function
+ * Check for a default return value entry for the given stub function
  *
- * If a UT_SetForceFail() option is in place for the given function this
+ * If a UT_SetDefaultReturnValue() option is in place for the given function this
  * will return true and increment the internal usage counter.
  *
  * \param FuncKey The stub function to check the return code.
- * \param Value Set to the value supplied to UT_SetForceFail()
+ * \param Value Set to the value supplied to UT_SetDefaultReturnValue()
  * \returns true if force fail mode is active
  */
-bool UT_Stub_CheckForceFail(UT_EntryKey_t FuncKey, int32 *Value);
+bool UT_Stub_CheckDefaultReturnValue(UT_EntryKey_t FuncKey, int32 *Value);
 
 /**
  * Copies data from a test-supplied buffer to the local buffer
@@ -287,7 +309,7 @@ bool UT_Stub_CheckForceFail(UT_EntryKey_t FuncKey, int32 *Value);
  * \returns The actual size of data copied.  If no data buffer is
  *      supplied by the test harness this will return 0.
  */
-uint32 UT_Stub_CopyToLocal(UT_EntryKey_t FuncKey, void *LocalBuffer, uint32 MaxSize);
+size_t UT_Stub_CopyToLocal(UT_EntryKey_t FuncKey, void *LocalBuffer, size_t MaxSize);
 
 /**
  * Copies data from a local buffer to the test-supplied buffer
@@ -301,7 +323,34 @@ uint32 UT_Stub_CopyToLocal(UT_EntryKey_t FuncKey, void *LocalBuffer, uint32 MaxS
  * \returns The actual size of data copied.  If no data buffer is
  *      supplied by the test harness this will return 0.
  */
-uint32 UT_Stub_CopyFromLocal(UT_EntryKey_t FuncKey, const void *LocalBuffer, uint32 MaxSize);
+size_t UT_Stub_CopyFromLocal(UT_EntryKey_t FuncKey, const void *LocalBuffer, size_t MaxSize);
+
+/**
+ * Registers a single context element for the hook callback
+ *
+ * Stubs may pass up to UT_STUBCONTEXT_MAXSIZE arguments to a user-defined
+ * hook function.  These arguments are opaque to the stub function and generally
+ * passed as "void *" pointers to the actual stack values.  The user code must
+ * then cast them to the right type again.
+ *
+ * This is now implemented as a macro which calls UT_Stub_RegisterContextWithMetaData
+ * to associate the name of the argument as well as the pointer.
+ *
+ * \param FuncKey   The stub function to entry to use.
+ * \param Parameter Arbitrary parameter to pass.
+ */
+#define UT_Stub_RegisterContext(FuncKey, Parameter) \
+    UT_Stub_RegisterContextWithMetaData(FuncKey, #Parameter, UT_STUBCONTEXT_ARG_TYPE_UNSPECIFIED, Parameter, 0)
+
+/**
+ * Registers a single value argument into the context for the hook callback
+ *
+ * A pointer to the stack value is actually stored into the context,
+ * which can be dereferenced in the hook.
+ */
+#define UT_Stub_RegisterContextGenericArg(FuncKey, Parameter)                                              \
+    UT_Stub_RegisterContextWithMetaData(FuncKey, #Parameter, UT_STUBCONTEXT_ARG_TYPE_INDIRECT, &Parameter, \
+                                        sizeof(Parameter))
 
 /**
  * Registers a single context element for the hook callback
@@ -312,9 +361,43 @@ uint32 UT_Stub_CopyFromLocal(UT_EntryKey_t FuncKey, const void *LocalBuffer, uin
  * then cast them to the right type again.
  *
  * \param FuncKey   The stub function to entry to use.
- * \param Parameter Arbitrary parameter to pass.
+ * \param Name      Argument name to associate with the pointer
+ * \param ParamType The type of parameter (direct, indirect, or unknown)
+ * \param ParamPtr  Pointer to argument data
+ * \param ParamSize The size of the object pointed to, or zero if not known
  */
-void UT_Stub_RegisterContext(UT_EntryKey_t FuncKey, const void *Parameter);
+void UT_Stub_RegisterContextWithMetaData(UT_EntryKey_t FuncKey, const char *Name, UT_StubContext_Arg_Type_t ParamType,
+                                         const void *ParamPtr, size_t ParamSize);
+
+/**
+ * Retrieve a context argument value by name
+ *
+ * This returns a pointer to a buffer containing the value, rather than the
+ * value itself, even if the argument was registered originally as a direct value.
+ *
+ * If the name is not found, this logs a UT assert failure message, as it
+ * indicates a mismatch between the hook and stub functions with respect to argument
+ * names and (possibly) types that needs to be corrected.  If possible, a buffer
+ * containing all zeros may be used as a substitute.
+ *
+ * This does not return NULL, such that the returned value can always be dereferenced.
+ *
+ * \param ContextPtr   The context structure containing arguments
+ * \param Name         Argument name to find
+ * \param ExpectedSize The size of the expected object type
+ * \returns Pointer to buffer containing the value.
+ */
+const void *UT_Hook_GetArgPtr(const UT_StubContext_t *ContextPtr, const char *Name, size_t ExpectedTypeSize);
+
+/**
+ * Macro which retrieves a value argument by name.
+ *
+ * This is a convenience method to easily use UT_Hook_GetArgPtr() to get the value
+ * associated with an argument as the correct/expected type.
+ *
+ */
+#define UT_Hook_GetArgValueByName(ContextPtr, Name, Type) \
+    (*(Type const *)UT_Hook_GetArgPtr(ContextPtr, Name, sizeof(Type)))
 
 /**
  * Default implementation for a stub function that takes a va_list of arguments.
@@ -330,7 +413,6 @@ void UT_Stub_RegisterContext(UT_EntryKey_t FuncKey, const void *Parameter);
  */
 int32 UT_DefaultStubImplWithArgs(const char *FunctionName, UT_EntryKey_t FuncKey, int32 DefaultRc, va_list va);
 
-
 /**
  * Default implementation for a stub function that should be useful for most cases.
  *
@@ -343,7 +425,6 @@ int32 UT_DefaultStubImplWithArgs(const char *FunctionName, UT_EntryKey_t FuncKey
  */
 int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 DefaultRc, ...);
 
-
 /**
  * Macro to simplify usage of the UT_DefaultStubImpl() function
  *
@@ -353,8 +434,15 @@ int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 
  *
  * This version should be used on stubs that take no arguments
  * and are expected to return 0 in the nominal case
+ *
+ * NOTE - Adding a NULL to the va list is only done for the
+ *        two macros that do not have a va list passed in by the
+ *        caller and is NOT a general pattern. Hooks that handle
+ *        va lists should utilize the UT_KEY to process
+ *        va lists correctly based on the implementation (no
+ *        general pattern should be assumed).
  */
-#define UT_DEFAULT_IMPL(FuncName)           UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), 0)
+#define UT_DEFAULT_IMPL(FuncName) UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), 0, NULL)
 
 /**
  * Macro to simplify usage of the UT_DefaultStubImpl() function
@@ -365,8 +453,15 @@ int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 
  *
  * This version should be used on stubs that take no arguments
  * and are expected to return nonzero in the nominal case
+ *
+ * NOTE - Adding a NULL to the va list is only done for the
+ *        two macros that do not have a va list passed in by the
+ *        caller and is NOT a general pattern. Hooks that handle
+ *        va lists should utilize the UT_KEY to process
+ *        va lists correctly based on the implementation (no
+ *        general pattern should be assumed).
  */
-#define UT_DEFAULT_IMPL_RC(FuncName, Rc)    UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), Rc)
+#define UT_DEFAULT_IMPL_RC(FuncName, Rc) UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), Rc, NULL)
 
 /**
  * Macro to simplify usage of the UT_DefaultStubImpl() function
@@ -378,8 +473,7 @@ int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 
  * This version should be used on stubs that do take arguments
  * and are expected to return 0 in the nominal case
  */
-#define UT_DEFAULT_IMPL_ARGS(FuncName,...)  UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), 0, __VA_ARGS__)
-
+#define UT_DEFAULT_IMPL_ARGS(FuncName, ...) UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), 0, __VA_ARGS__)
 
 /**
  * Macro to simplify usage of the UT_DefaultStubImpl() function
@@ -388,7 +482,22 @@ int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 
  * where the default items of deferred return codes / force fails are
  * checked first, then additional functionality is added.
  */
-#define UT_DEFAULT_IMPL_RC_ARGS(FuncName,Rc,...)  UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), Rc, __VA_ARGS__)
+#define UT_DEFAULT_IMPL_RC_ARGS(FuncName, Rc, ...) UT_DefaultStubImpl(#FuncName, UT_KEY(FuncName), Rc, __VA_ARGS__)
+
+/**
+ * Macro to simplify usage of the UT_DefaultStubImplWithArgs() function
+ *
+ * This function accepts a list of arguments as a va_list
+ */
+#define UT_DEFAULT_IMPL_VARARGS(FuncName, va) UT_DefaultStubImplWithArgs(#FuncName, UT_KEY(FuncName), 0, va)
+
+/**
+ * Macro to simplify usage of the UT_DefaultStubImplWithArgs() function
+ *
+ * This function accepts a list of arguments as a va_list and
+ * a nonzero default return code
+ */
+#define UT_DEFAULT_IMPL_RC_VARARGS(FuncName, Rc, va) UT_DefaultStubImplWithArgs(#FuncName, UT_KEY(FuncName), Rc, va)
 
 /**
  * Macro to simplify usage of the UT_DefaultStubImpl() function
@@ -396,8 +505,10 @@ int32 UT_DefaultStubImpl(const char *FunctionName, UT_EntryKey_t FuncKey, int32 
  * The UT_DEFAULT_STUB can be used as a complete stub implementation
  * when only deferred return codes / force fails are in use.
  */
-#define UT_DEFAULT_STUB(FuncName, Args)     int32 FuncName Args { return UT_DEFAULT_IMPL(FuncName); }
+#define UT_DEFAULT_STUB(FuncName, Args)   \
+    int32 FuncName Args                   \
+    {                                     \
+        return UT_DEFAULT_IMPL(FuncName); \
+    }
 
-
-
-#endif /* _UTSTUBS_H_ */
+#endif /* UTSTUBS_H */

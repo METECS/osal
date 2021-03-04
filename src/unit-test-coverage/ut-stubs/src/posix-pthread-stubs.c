@@ -1,11 +1,21 @@
 /*
- *      Copyright (c) 2019, United States government as represented by the
- *      administrator of the National Aeronautics Space Administration.
- *      All rights reserved. This software was created at NASA Goddard
- *      Space Flight Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *      This is governed by the NASA Open Source Agreement and may be used,
- *      distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /* OSAL coverage stub replacement for pthread.h */
@@ -15,7 +25,7 @@
 
 #include <OCS_pthread.h>
 
-int OCS_pthread_attr_destroy (OCS_pthread_attr_t * attr)
+int OCS_pthread_attr_destroy(OCS_pthread_attr_t *attr)
 {
     int32 Status;
 
@@ -24,7 +34,7 @@ int OCS_pthread_attr_destroy (OCS_pthread_attr_t * attr)
     return Status;
 }
 
-int OCS_pthread_attr_getschedparam (const OCS_pthread_attr_t * attr, struct OCS_sched_param * param)
+int OCS_pthread_attr_getschedparam(const OCS_pthread_attr_t *attr, struct OCS_sched_param *param)
 {
     int32 Status;
 
@@ -33,7 +43,7 @@ int OCS_pthread_attr_getschedparam (const OCS_pthread_attr_t * attr, struct OCS_
     return Status;
 }
 
-int OCS_pthread_attr_init (OCS_pthread_attr_t * attr)
+int OCS_pthread_attr_init(OCS_pthread_attr_t *attr)
 {
     int32 Status;
 
@@ -42,7 +52,7 @@ int OCS_pthread_attr_init (OCS_pthread_attr_t * attr)
     return Status;
 }
 
-int OCS_pthread_attr_setinheritsched (OCS_pthread_attr_t * attr, int inherit)
+int OCS_pthread_attr_setinheritsched(OCS_pthread_attr_t *attr, int inherit)
 {
     int32 Status;
 
@@ -51,7 +61,7 @@ int OCS_pthread_attr_setinheritsched (OCS_pthread_attr_t * attr, int inherit)
     return Status;
 }
 
-int OCS_pthread_attr_setschedparam (OCS_pthread_attr_t * attr, const struct OCS_sched_param * param)
+int OCS_pthread_attr_setschedparam(OCS_pthread_attr_t *attr, const struct OCS_sched_param *param)
 {
     int32 Status;
 
@@ -60,7 +70,7 @@ int OCS_pthread_attr_setschedparam (OCS_pthread_attr_t * attr, const struct OCS_
     return Status;
 }
 
-int OCS_pthread_attr_setschedpolicy (OCS_pthread_attr_t * attr, int policy)
+int OCS_pthread_attr_setschedpolicy(OCS_pthread_attr_t *attr, int policy)
 {
     int32 Status;
 
@@ -69,7 +79,7 @@ int OCS_pthread_attr_setschedpolicy (OCS_pthread_attr_t * attr, int policy)
     return Status;
 }
 
-int OCS_pthread_attr_setstacksize (OCS_pthread_attr_t * attr, size_t stacksize)
+int OCS_pthread_attr_setstacksize(OCS_pthread_attr_t *attr, size_t stacksize)
 {
     int32 Status;
 
@@ -78,7 +88,7 @@ int OCS_pthread_attr_setstacksize (OCS_pthread_attr_t * attr, size_t stacksize)
     return Status;
 }
 
-int OCS_pthread_cancel (OCS_pthread_t th)
+int OCS_pthread_cancel(OCS_pthread_t th)
 {
     int32 Status;
 
@@ -87,7 +97,7 @@ int OCS_pthread_cancel (OCS_pthread_t th)
     return Status;
 }
 
-int OCS_pthread_cond_broadcast (OCS_pthread_cond_t * cond)
+int OCS_pthread_cond_broadcast(OCS_pthread_cond_t *cond)
 {
     int32 Status;
 
@@ -96,7 +106,7 @@ int OCS_pthread_cond_broadcast (OCS_pthread_cond_t * cond)
     return Status;
 }
 
-int OCS_pthread_cond_destroy (OCS_pthread_cond_t * cond)
+int OCS_pthread_cond_destroy(OCS_pthread_cond_t *cond)
 {
     int32 Status;
 
@@ -105,7 +115,7 @@ int OCS_pthread_cond_destroy (OCS_pthread_cond_t * cond)
     return Status;
 }
 
-int OCS_pthread_cond_init (OCS_pthread_cond_t * cond, const OCS_pthread_condattr_t * cond_attr)
+int OCS_pthread_cond_init(OCS_pthread_cond_t *cond, const OCS_pthread_condattr_t *cond_attr)
 {
     int32 Status;
 
@@ -113,7 +123,7 @@ int OCS_pthread_cond_init (OCS_pthread_cond_t * cond, const OCS_pthread_condattr
 
     return Status;
 }
-int OCS_pthread_cond_signal (OCS_pthread_cond_t * cond)
+int OCS_pthread_cond_signal(OCS_pthread_cond_t *cond)
 {
     int32 Status;
 
@@ -122,7 +132,7 @@ int OCS_pthread_cond_signal (OCS_pthread_cond_t * cond)
     return Status;
 }
 
-int OCS_pthread_cond_timedwait (OCS_pthread_cond_t * cond, OCS_pthread_mutex_t * mutex, const struct OCS_timespec * abstime)
+int OCS_pthread_cond_timedwait(OCS_pthread_cond_t *cond, OCS_pthread_mutex_t *mutex, const struct OCS_timespec *abstime)
 {
     int32 Status;
 
@@ -131,7 +141,7 @@ int OCS_pthread_cond_timedwait (OCS_pthread_cond_t * cond, OCS_pthread_mutex_t *
     return Status;
 }
 
-int OCS_pthread_cond_wait (OCS_pthread_cond_t * cond, OCS_pthread_mutex_t * mutex)
+int OCS_pthread_cond_wait(OCS_pthread_cond_t *cond, OCS_pthread_mutex_t *mutex)
 {
     int32 Status;
 
@@ -140,7 +150,8 @@ int OCS_pthread_cond_wait (OCS_pthread_cond_t * cond, OCS_pthread_mutex_t * mute
     return Status;
 }
 
-int OCS_pthread_create (OCS_pthread_t * newthread, const OCS_pthread_attr_t * attr, void *(* start_routine) (void *), void * arg)
+int OCS_pthread_create(OCS_pthread_t *newthread, const OCS_pthread_attr_t *attr, void *(*start_routine)(void *),
+                       void *arg)
 {
     int32 Status;
 
@@ -149,7 +160,7 @@ int OCS_pthread_create (OCS_pthread_t * newthread, const OCS_pthread_attr_t * at
     return Status;
 }
 
-int OCS_pthread_detach (OCS_pthread_t th)
+int OCS_pthread_detach(OCS_pthread_t th)
 {
     int32 Status;
 
@@ -158,7 +169,7 @@ int OCS_pthread_detach (OCS_pthread_t th)
     return Status;
 }
 
-int OCS_pthread_equal (OCS_pthread_t thread1, OCS_pthread_t thread2)
+int OCS_pthread_equal(OCS_pthread_t thread1, OCS_pthread_t thread2)
 {
     int32 Status;
 
@@ -172,12 +183,12 @@ int OCS_pthread_equal (OCS_pthread_t thread1, OCS_pthread_t thread2)
     return Status;
 }
 
-void OCS_pthread_exit (void * retval)
+void OCS_pthread_exit(void *retval)
 {
     UT_DEFAULT_IMPL(OCS_pthread_exit);
 }
 
-int OCS_pthread_getschedparam (OCS_pthread_t target_thread, int * policy, struct OCS_sched_param * param)
+int OCS_pthread_getschedparam(OCS_pthread_t target_thread, int *policy, struct OCS_sched_param *param)
 {
     int32 Status;
 
@@ -186,24 +197,22 @@ int OCS_pthread_getschedparam (OCS_pthread_t target_thread, int * policy, struct
     return Status;
 }
 
-void *OCS_pthread_getspecific (OCS_pthread_key_t key)
+void *OCS_pthread_getspecific(OCS_pthread_key_t key)
 {
     int32 Status;
     void *retval;
 
     Status = UT_DEFAULT_IMPL(OCS_pthread_getspecific);
 
-    if (Status != 0 ||
-            UT_Stub_CopyToLocal(UT_KEY(OCS_pthread_getspecific), &retval, sizeof(retval)) < sizeof(retval))
+    if (Status != 0 || UT_Stub_CopyToLocal(UT_KEY(OCS_pthread_getspecific), &retval, sizeof(retval)) < sizeof(retval))
     {
         retval = NULL;
     }
 
-
     return retval;
 }
 
-int OCS_pthread_key_create (OCS_pthread_key_t * key, void (* destr_function) (void *))
+int OCS_pthread_key_create(OCS_pthread_key_t *key, void (*destr_function)(void *))
 {
     int32 Status;
 
@@ -212,7 +221,7 @@ int OCS_pthread_key_create (OCS_pthread_key_t * key, void (* destr_function) (vo
     return Status;
 }
 
-int OCS_pthread_mutexattr_destroy (OCS_pthread_mutexattr_t * attr)
+int OCS_pthread_mutexattr_destroy(OCS_pthread_mutexattr_t *attr)
 {
     int32 Status;
 
@@ -221,7 +230,7 @@ int OCS_pthread_mutexattr_destroy (OCS_pthread_mutexattr_t * attr)
     return Status;
 }
 
-int OCS_pthread_mutexattr_init (OCS_pthread_mutexattr_t * attr)
+int OCS_pthread_mutexattr_init(OCS_pthread_mutexattr_t *attr)
 {
     int32 Status;
 
@@ -230,7 +239,7 @@ int OCS_pthread_mutexattr_init (OCS_pthread_mutexattr_t * attr)
     return Status;
 }
 
-int OCS_pthread_mutexattr_setprotocol (OCS_pthread_mutexattr_t * attr, int protocol)
+int OCS_pthread_mutexattr_setprotocol(OCS_pthread_mutexattr_t *attr, int protocol)
 {
     int32 Status;
 
@@ -239,7 +248,7 @@ int OCS_pthread_mutexattr_setprotocol (OCS_pthread_mutexattr_t * attr, int proto
     return Status;
 }
 
-int OCS_pthread_mutexattr_settype (OCS_pthread_mutexattr_t * attr, int kind)
+int OCS_pthread_mutexattr_settype(OCS_pthread_mutexattr_t *attr, int kind)
 {
     int32 Status;
 
@@ -248,7 +257,7 @@ int OCS_pthread_mutexattr_settype (OCS_pthread_mutexattr_t * attr, int kind)
     return Status;
 }
 
-int OCS_pthread_mutex_destroy (OCS_pthread_mutex_t * mutex)
+int OCS_pthread_mutex_destroy(OCS_pthread_mutex_t *mutex)
 {
     int32 Status;
 
@@ -257,7 +266,7 @@ int OCS_pthread_mutex_destroy (OCS_pthread_mutex_t * mutex)
     return Status;
 }
 
-int OCS_pthread_mutex_init (OCS_pthread_mutex_t * mutex, const OCS_pthread_mutexattr_t * mutexattr)
+int OCS_pthread_mutex_init(OCS_pthread_mutex_t *mutex, const OCS_pthread_mutexattr_t *mutexattr)
 {
     int32 Status;
 
@@ -266,7 +275,7 @@ int OCS_pthread_mutex_init (OCS_pthread_mutex_t * mutex, const OCS_pthread_mutex
     return Status;
 }
 
-int OCS_pthread_mutex_lock (OCS_pthread_mutex_t * mutex)
+int OCS_pthread_mutex_lock(OCS_pthread_mutex_t *mutex)
 {
     int32 Status;
 
@@ -275,7 +284,7 @@ int OCS_pthread_mutex_lock (OCS_pthread_mutex_t * mutex)
     return Status;
 }
 
-int OCS_pthread_mutex_unlock (OCS_pthread_mutex_t * mutex)
+int OCS_pthread_mutex_unlock(OCS_pthread_mutex_t *mutex)
 {
     int32 Status;
 
@@ -284,7 +293,7 @@ int OCS_pthread_mutex_unlock (OCS_pthread_mutex_t * mutex)
     return Status;
 }
 
-OCS_pthread_t OCS_pthread_self (void)
+OCS_pthread_t OCS_pthread_self(void)
 {
     OCS_pthread_t result;
 
@@ -293,7 +302,7 @@ OCS_pthread_t OCS_pthread_self (void)
     return result;
 }
 
-int OCS_pthread_setschedparam (OCS_pthread_t target_thread, int policy, const struct OCS_sched_param * param)
+int OCS_pthread_setschedparam(OCS_pthread_t target_thread, int policy, const struct OCS_sched_param *param)
 {
     int32 Status;
 
@@ -302,7 +311,7 @@ int OCS_pthread_setschedparam (OCS_pthread_t target_thread, int policy, const st
     return Status;
 }
 
-int OCS_pthread_setschedprio (OCS_pthread_t target_thread, int prio)
+int OCS_pthread_setschedprio(OCS_pthread_t target_thread, int prio)
 {
     int32 Status;
 
@@ -311,7 +320,7 @@ int OCS_pthread_setschedprio (OCS_pthread_t target_thread, int prio)
     return Status;
 }
 
-int OCS_pthread_setspecific (OCS_pthread_key_t key, const void * pointer)
+int OCS_pthread_setspecific(OCS_pthread_key_t key, const void *pointer)
 {
     int32 Status;
 
@@ -320,7 +329,7 @@ int OCS_pthread_setspecific (OCS_pthread_key_t key, const void * pointer)
     return Status;
 }
 
-int OCS_pthread_sigmask (int how, const OCS_sigset_t *set, OCS_sigset_t * oldset)
+int OCS_pthread_sigmask(int how, const OCS_sigset_t *set, OCS_sigset_t *oldset)
 {
     int32 Status;
 
@@ -328,4 +337,3 @@ int OCS_pthread_sigmask (int how, const OCS_sigset_t *set, OCS_sigset_t * oldset
 
     return Status;
 }
-

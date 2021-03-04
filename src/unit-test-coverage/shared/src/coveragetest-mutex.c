@@ -1,29 +1,31 @@
 /*
- *      Copyright (c) 2019, United States government as represented by the
- *      administrator of the National Aeronautics Space Administration.
- *      All rights reserved. This software was created at NASA Goddard
- *      Space Flight Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *      This is governed by the NASA Open Source Agreement and may be used,
- *      distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
-/*
- * Filename: osapi_testcase_common.c
- *
- * Purpose: This file contains unit test cases for items in the "osapi-common" file
- *
- * Notes:
+/**
+ * \file     coveragetest-mutex.c
+ * \ingroup  shared
+ * \author   joseph.p.hickey@nasa.gov
  *
  */
-
-
-/*
- * Includes
- */
-
 #include "os-shared-coveragetest.h"
-#include "ut-osapi-mutex.h"
+#include "os-shared-mutex.h"
 
 #include <OCS_string.h>
 
@@ -40,11 +42,10 @@ void Test_OS_MutexAPI_Init(void)
      * int32 OS_MutSemAPI_Init(void)
      */
     int32 expected = OS_SUCCESS;
-    int32 actual = OS_MutexAPI_Init();
+    int32 actual   = OS_MutexAPI_Init();
 
     UtAssert_True(actual == expected, "OS_MutexAPI_Init() (%ld) == OS_SUCCESS", (long)actual);
 }
-
 
 void Test_OS_MutSemCreate(void)
 {
@@ -52,15 +53,15 @@ void Test_OS_MutSemCreate(void)
      * Test Case For:
      * int32 OS_MutSemCreate (uint32 *sem_id, const char *sem_name, uint32 options)
      */
-    int32 expected = OS_SUCCESS;
-    uint32 objid = 0xFFFFFFFF;
-    int32 actual = OS_MutSemCreate(&objid, "UT", 0);
+    int32     expected = OS_SUCCESS;
+    osal_id_t objid;
+    int32     actual = OS_MutSemCreate(&objid, "UT", 0);
 
     UtAssert_True(actual == expected, "OS_MutSemCreate() (%ld) == OS_SUCCESS", (long)actual);
-    UtAssert_True(objid != 0, "objid (%lu) != 0", (unsigned long)objid);
+    OSAPI_TEST_OBJID(objid, !=, OS_OBJECT_ID_UNDEFINED);
 
     OSAPI_TEST_FUNCTION_RC(OS_MutSemCreate(NULL, NULL, 0), OS_INVALID_POINTER);
-    UT_SetForceFail(UT_KEY(OCS_strlen), 10 + OS_MAX_API_NAME);
+    UT_SetDefaultReturnValue(UT_KEY(OCS_memchr), OS_ERROR);
     OSAPI_TEST_FUNCTION_RC(OS_MutSemCreate(&objid, "UT", 0), OS_ERR_NAME_TOO_LONG);
 }
 
@@ -71,9 +72,9 @@ void Test_OS_MutSemDelete(void)
      * int32 OS_MutSemDelete (uint32 sem_id)
      */
     int32 expected = OS_SUCCESS;
-    int32 actual = ~OS_SUCCESS;
+    int32 actual   = ~OS_SUCCESS;
 
-    actual = OS_MutSemDelete(1);
+    actual = OS_MutSemDelete(UT_OBJID_1);
 
     UtAssert_True(actual == expected, "OS_MutSemDelete() (%ld) == OS_SUCCESS", (long)actual);
 }
@@ -84,14 +85,27 @@ void Test_OS_MutSemGive(void)
      * Test Case For:
      * int32 OS_MutSemGive ( uint32 sem_id )
      */
-    int32 expected = OS_SUCCESS;
-    int32 actual = ~OS_SUCCESS;
+    OS_mutex_internal_record_t *mutex;
+    int32                       expected;
+    int32                       actual;
 
-    actual = OS_MutSemGive(1);
+    expected = OS_SUCCESS;
+
+    /* Set up for "last owner" matching the calling task (nominal) */
+    mutex             = &OS_mutex_table[1];
+    mutex->last_owner = OS_TaskGetId();
+    actual            = OS_MutSemGive(UT_OBJID_1);
 
     UtAssert_True(actual == expected, "OS_MutSemGive() (%ld) == OS_SUCCESS", (long)actual);
-}
 
+    /* owner should be unset */
+    UtAssert_True(!OS_ObjectIdDefined(mutex->last_owner), "Mutex owner unset");
+
+    /* Call again when not "owned".  This still works (or at least it calls the OS impl)
+     * but should generate a debug message */
+    actual = OS_MutSemGive(UT_OBJID_1);
+    UtAssert_True(actual == expected, "OS_MutSemGive(), not owned (%ld) == OS_SUCCESS", (long)actual);
+}
 
 void Test_OS_MutSemTake(void)
 {
@@ -99,11 +113,24 @@ void Test_OS_MutSemTake(void)
      * Test Case For:
      * int32 OS_MutSemTake ( uint32 sem_id )
      */
-    int32 expected = OS_SUCCESS;
-    int32 actual = ~OS_SUCCESS;
+    OS_mutex_internal_record_t *mutex;
+    int32                       expected;
+    int32                       actual;
 
-    actual = OS_MutSemTake(1);
+    expected = OS_SUCCESS;
 
+    /* Set up for "last owner" being undefined (nominal) */
+    mutex             = &OS_mutex_table[1];
+    mutex->last_owner = OS_OBJECT_ID_UNDEFINED;
+    actual            = OS_MutSemTake(UT_OBJID_1);
+    UtAssert_True(actual == expected, "OS_MutSemTake() (%ld) == OS_SUCCESS", (long)actual);
+
+    /* owner should be set */
+    UtAssert_True(OS_ObjectIdDefined(mutex->last_owner), "Mutex owner set");
+
+    /* Call again when not already "owned".  This still works (or at least it calls the OS impl)
+     * but should generate a debug message */
+    actual = OS_MutSemTake(UT_OBJID_1);
     UtAssert_True(actual == expected, "OS_MutSemTake() (%ld) == OS_SUCCESS", (long)actual);
 }
 
@@ -113,23 +140,21 @@ void Test_OS_MutSemGetIdByName(void)
      * Test Case For:
      * int32 OS_MutSemGetIdByName (uint32 *sem_id, const char *sem_name)
      */
-    int32 expected = OS_SUCCESS;
-    int32 actual = ~OS_SUCCESS;
-    uint32 objid = 0;
+    int32     expected = OS_SUCCESS;
+    int32     actual   = ~OS_SUCCESS;
+    osal_id_t objid;
 
-    UT_SetForceFail(UT_KEY(OS_ObjectIdFindByName), OS_SUCCESS);
+    UT_SetDefaultReturnValue(UT_KEY(OS_ObjectIdFindByName), OS_SUCCESS);
     actual = OS_MutSemGetIdByName(&objid, "UT");
     UtAssert_True(actual == expected, "OS_MutSemGetIdByName() (%ld) == OS_SUCCESS", (long)actual);
-    UtAssert_True(objid != 0, "OS_MutSemGetIdByName() objid (%lu) != 0", (unsigned long)objid);
-    UT_ClearForceFail(UT_KEY(OS_ObjectIdFindByName));
+    OSAPI_TEST_OBJID(objid, !=, OS_OBJECT_ID_UNDEFINED);
+    UT_ClearDefaultReturnValue(UT_KEY(OS_ObjectIdFindByName));
 
     expected = OS_ERR_NAME_NOT_FOUND;
-    actual = OS_MutSemGetIdByName(&objid, "NF");
-    UtAssert_True(actual == expected, "OS_MutSemGetIdByName() (%ld) == %ld",
-            (long)actual, (long)expected);
+    actual   = OS_MutSemGetIdByName(&objid, "NF");
+    UtAssert_True(actual == expected, "OS_MutSemGetIdByName() (%ld) == %ld", (long)actual, (long)expected);
 
     OSAPI_TEST_FUNCTION_RC(OS_MutSemGetIdByName(NULL, NULL), OS_INVALID_POINTER);
-
 }
 
 void Test_OS_MutSemGetInfo(void)
@@ -138,58 +163,43 @@ void Test_OS_MutSemGetInfo(void)
      * Test Case For:
      * int32 OS_MutSemGetInfo (uint32 sem_id, OS_mut_sem_prop_t *mut_prop)
      */
-    int32 expected = OS_SUCCESS;
-    int32 actual = ~OS_SUCCESS;
+    int32             expected = OS_SUCCESS;
+    int32             actual   = ~OS_SUCCESS;
     OS_mut_sem_prop_t prop;
-    uint32 local_index = 1;
-    OS_common_record_t utrec;
-    OS_common_record_t *rptr = &utrec;
 
-    memset(&utrec, 0, sizeof(utrec));
-    utrec.creator = 111;
-    utrec.name_entry = "ABC";
-    UT_SetDataBuffer(UT_KEY(OS_ObjectIdGetById), &local_index, sizeof(local_index), false);
-    UT_SetDataBuffer(UT_KEY(OS_ObjectIdGetById), &rptr, sizeof(rptr), false);
-    actual = OS_MutSemGetInfo(1, &prop);
+    OS_UT_SetupBasicInfoTest(OS_OBJECT_TYPE_OS_MUTEX, UT_INDEX_1, "ABC", UT_OBJID_OTHER);
+
+    actual = OS_MutSemGetInfo(UT_OBJID_1, &prop);
 
     UtAssert_True(actual == expected, "OS_MutSemGetInfo() (%ld) == OS_SUCCESS", (long)actual);
-    UtAssert_True(prop.creator == 111, "prop.creator (%lu) == 111",
-            (unsigned long)prop.creator);
-    UtAssert_True(strcmp(prop.name, "ABC") == 0, "prop.name (%s) == ABC",
-            prop.name);
+    OSAPI_TEST_OBJID(prop.creator, ==, UT_OBJID_OTHER);
+    UtAssert_True(strcmp(prop.name, "ABC") == 0, "prop.name (%s) == ABC", prop.name);
 
-    OSAPI_TEST_FUNCTION_RC(OS_MutSemGetInfo(0, NULL), OS_INVALID_POINTER);
-
+    OSAPI_TEST_FUNCTION_RC(OS_MutSemGetInfo(UT_OBJID_1, NULL), OS_INVALID_POINTER);
 }
 
-
-
-/* Osapi_Task_Setup
+/* Osapi_Test_Setup
  *
  * Purpose:
  *   Called by the unit test tool to set up the app prior to each test
  */
-void Osapi_Task_Setup(void)
+void Osapi_Test_Setup(void)
 {
     UT_ResetState(0);
 }
 
 /*
- * Osapi_TearDown
+ * Osapi_Test_Teardown
  *
  * Purpose:
  *   Called by the unit test tool to tear down the app after each test
  */
-void Osapi_TearDown(void)
-{
-
-}
-
+void Osapi_Test_Teardown(void) {}
 
 /*
  * Register the test cases to execute with the unit test tool
  */
-void OS_Application_Startup(void)
+void UtTest_Setup(void)
 {
     ADD_TEST(OS_MutexAPI_Init);
     ADD_TEST(OS_MutSemCreate);
@@ -199,8 +209,3 @@ void OS_Application_Startup(void)
     ADD_TEST(OS_MutSemGetIdByName);
     ADD_TEST(OS_MutSemGetInfo);
 }
-
-
-
-
-

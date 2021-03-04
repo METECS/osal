@@ -1,11 +1,21 @@
 /*
- *  Copyright (c) 2004-2015, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
@@ -30,9 +40,8 @@
  * and the way pass/fail determinations are made.
  */
 
-
-#ifndef _UTBSP_H_
-#define _UTBSP_H_
+#ifndef UTBSP_H
+#define UTBSP_H
 
 #include "common_types.h"
 #include "utassert.h"
@@ -40,20 +49,6 @@
 /**************************************************************
  * Functions implemented by the UT-specific BSP
  **************************************************************/
-
-/**
- * Gets the number of additional user-supplied options
- *
- * For instance, this would be command line parameters on platforms that have a command line.
- */
-int32 UT_BSP_GetTotalOptions(void);
-
-/**
- * Gets the text string associated with a specific user-supplied option
- *
- * For instance, this would be command line parameters on platforms that have a command line.
- */
-const char * UT_BSP_GetOptionString(int32 OptionNum);
 
 /*
  * Note - functions here are not typically directly called by UT code, they
@@ -67,10 +62,8 @@ const char * UT_BSP_GetOptionString(int32 OptionNum);
  * Initialize the BSP for unit test.
  *
  * This is just a hook for the BSP to be informed of the start-of-test event and may be a no-op.
- *
- * \param Name Name of application under test
  */
-void UT_BSP_Setup(const char *Name);
+void UT_BSP_Setup(void);
 
 /**
  * Initialize the unit test at the BSP layer.
@@ -96,38 +89,6 @@ void UT_BSP_StartTestSegment(uint32 SegmentNumber, const char *SegmentName);
  */
 void UT_BSP_DoText(uint8 MessageType, const char *OutputMessage);
 
-
-/**
- * The BSP single test case reporting function.
- *
- * Invokes the BSP-specific pass/fail reporting mechanism based on the MessageType.
- *
- * This is typically output as a message to the test log but may be fancier if the BSP requires it.
- * One example might be to toggle a GPIO bit or LED if the test is running on a separate processor board.
- *
- * \param File         File containing the test case
- * \param LineNum      Line number containing the test case
- * \param MessageType  Should be set to either UT_MESSAGE_PASS or UT_MESSAGE_FAILURE.
- * \param SubsysName   The subsystem under test (abbreviated name)
- * \param ShortDesc    Short description of the test case
- * \param SegmentNum   Sequence among the overall/global test Segments
- * \param TestDescr    Sequence within the current test Segment
- */
-void UT_BSP_DoReport(const char *File, uint32 LineNum, uint32 SegmentNum, uint32 SegmentSeq, uint8 MessageType, const char *SubsysName, const char *ShortDesc);
-
-/**
- * The BSP overall test reporting function.
- *
- * Invokes the BSP-specific overall pass/fail reporting mechanism based the subsystem pass/fail counters.
- *
- * Like the UT_BSP_DoReport() function, this is typically done as a message on the console/log however
- * it might be different for embedded targets.
- *
- * \param Appname       The application under test
- * \param TestCounters  Counter object for the completed test
- */
-void UT_BSP_DoTestSegmentReport(const char *SegmentName, const UtAssert_TestCounter_t *TestCounters);
-
 /**
  * The BSP overall test end function.
  *
@@ -139,5 +100,4 @@ void UT_BSP_DoTestSegmentReport(const char *SegmentName, const UtAssert_TestCoun
  */
 void UT_BSP_EndTest(const UtAssert_TestCounter_t *TestCounters);
 
-
-#endif /* _UTBSP_H_ */
+#endif /* UTBSP_H */

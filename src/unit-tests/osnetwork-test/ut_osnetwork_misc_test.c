@@ -1,3 +1,23 @@
+/*
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
+ *
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 /*================================================================================*
 ** File:  ut_osnetwork_misc_test.c
 ** Owner: Tam Ngo
@@ -34,86 +54,6 @@
 ** Local function definitions
 **--------------------------------------------------------------------------------*/
 
-/* Test code template for testing a single OSAL API with multiple test cases */
-
-#if 0
-void UT_os_sample_test()
-{
-    /* Must declare these variables for each function. They can be renamed.
-     * They're referenced in the macros used to track test cases and their results. */
-    int32 idx = 0;
-    const char* testDesc;
-
-    /*-----------------------------------------------------*
-     * For each test case,
-     *   1. Assign testDesc a brief description of the test
-     *   2. Setup the test environment, if necessary
-     *   3. Run the test
-     *   4. Log result by calling UT_OS_SET_TEST_RESULT_MACRO
-     *   4. Reset the test environment, if neccessary
-     *
-     * NOTE: "Not implemented" is always checked first but not
-     *       being included as a test case.
-     *       "Nominal" test case is always the last test case.
-     *-----------------------------------------------------*/
-
-    /*-----------------------------------------------------*/
-    testDesc = "API Not implemented";
-
-    /* TODO: Setup the test environment, if necessary */
-
-    if (OS_xxx() == OS_ERR_NOT_IMPLEMENTED)
-    {
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_NA);
-        goto UT_os_sample_test_exit_tag;
-    }
-
-    /* TODO: Reset the test environment here, if necessary */
-
-    /*-----------------------------------------------------*/
-    testDesc = "#1 Null-pointer-arg";
-
-    /* TODO: Setup the test environment here, if necessary */
-
-    if (OS_xxx(NULL,...) == OS_INVALID_POINTER)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
-    else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_FAILURE);
-
-    /* TODO: Reset the test environment here, if necessary */
-
-    /*-----------------------------------------------------*/
-    testDesc = "#2 Name-too-long-arg";
-
-    /* TODO: Setup the test environment here, if necessary */
-
-    if (OS_xxx(aVeryLoooooongName) == OS_ERR_NAME_TOO_LONG)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
-    else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_FAILURE);
-
-    /* TODO: Reset the test environment here, if necessary */
-
-    /*-----------------------------------------------------*/
-    testDesc = "#3 Nominal";
-
-    /* TODO: Setup the test environment here, if necessary */
-
-    if (OS_xxx(...) != OS_SUCCESS)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
-    else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
-
-    /* TODO: Reset the test environment here, if necessary */
-
-UT_os_sample_test_exit_tag:
-    /* Call these macros at the very end of the function to close out the test variables
-     * and get it added to the global list being tracked. */
-    return;
-    
-}
-#endif
-
 /*--------------------------------------------------------------------------------*
 ** Syntax: int32 OS_NetworkGetID(void)
 ** Purpose: Returns network ID of the machine it is on
@@ -140,8 +80,8 @@ UT_os_sample_test_exit_tag:
 **--------------------------------------------------------------------------------*/
 void UT_os_networkgetid_test()
 {
-    int32 res = 0;
-    const char* testDesc;
+    int32       res = 0;
+    const char *testDesc;
 
     /*-----------------------------------------------------*/
     testDesc = "API Not implemented";
@@ -149,14 +89,14 @@ void UT_os_networkgetid_test()
     res = OS_NetworkGetID();
     if (res == OS_ERR_NOT_IMPLEMENTED)
     {
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_NA);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_NA);
         goto UT_os_networkgetid_test_exit_tag;
     }
 
     /*-----------------------------------------------------*/
     testDesc = "#1 OS-call-failure";
 
-    UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_INFO);
+    UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_INFO);
 
     /*-----------------------------------------------------*/
     testDesc = "#2 Nominal";
@@ -165,12 +105,11 @@ void UT_os_networkgetid_test()
 
     /* NOTE: This API does not return error codes.
      * Any return value could be valid */
-    UT_OS_LOG("OS_NetworkGetID() return value=%ld", (long)res);
-    UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_MIR);
+    UtPrintf("OS_NetworkGetID() return value=%ld", (long)res);
+    UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_MIR);
 
 UT_os_networkgetid_test_exit_tag:
     return;
-    
 }
 
 /*--------------------------------------------------------------------------------*
@@ -211,9 +150,9 @@ UT_os_networkgetid_test_exit_tag:
 **--------------------------------------------------------------------------------*/
 void UT_os_networkgethostname_test()
 {
-    int32 res = 0;
-    const char* testDesc;
-    char buffer[UT_OS_IO_BUFF_SIZE];
+    int32       res = 0;
+    const char *testDesc;
+    char        buffer[UT_OS_IO_BUFF_SIZE];
 
     /*-----------------------------------------------------*/
     testDesc = "API Not implemented";
@@ -221,46 +160,44 @@ void UT_os_networkgethostname_test()
     res = OS_NetworkGetHostName(buffer, sizeof(buffer));
     if (res == OS_ERR_NOT_IMPLEMENTED)
     {
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_NA);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_NA);
         goto UT_os_networkgethostname_test_exit_tag;
     }
-
 
     /*-----------------------------------------------------*/
     testDesc = "#1 Null-pointer-arg";
 
     res = OS_NetworkGetHostName(NULL, 0);
     if (res == OS_INVALID_POINTER)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_PASS);
     else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_FAILURE);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_FAILURE);
 
     /*-----------------------------------------------------*/
     testDesc = "#2 Zero-name-length-arg";
 
     res = OS_NetworkGetHostName(buffer, 0);
-    if (res == OS_ERROR)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
+    if (res == OS_ERR_INVALID_SIZE)
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_PASS);
     else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_FAILURE);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_FAILURE);
 
     /*-----------------------------------------------------*/
     testDesc = "#3 OS-call-failure";
 
-    UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_INFO);
+    UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_INFO);
 
     /*-----------------------------------------------------*/
     testDesc = "#4 Nominal";
 
     res = OS_NetworkGetHostName(buffer, sizeof(buffer));
     if (res == OS_SUCCESS)
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_PASS);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_PASS);
     else
-        UT_OS_TEST_RESULT( testDesc, UTASSERT_CASETYPE_FAILURE);
+        UT_OS_TEST_RESULT(testDesc, UTASSERT_CASETYPE_FAILURE);
 
 UT_os_networkgethostname_test_exit_tag:
     return;
-    
 }
 
 /*================================================================================*

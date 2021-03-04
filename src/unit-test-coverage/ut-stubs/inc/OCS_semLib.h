@@ -1,6 +1,26 @@
+/*
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
+ *
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 /* OSAL coverage stub replacement for semLib.h */
-#ifndef _OSAL_STUB_SEMLIB_H_
-#define _OSAL_STUB_SEMLIB_H_
+#ifndef OCS_SEMLIB_H
+#define OCS_SEMLIB_H
 
 #include <OCS_basetypes.h>
 #include <OCS_vxWorks.h>
@@ -8,21 +28,21 @@
 /* ----------------------------------------- */
 /* constants normally defined in semLib.h */
 /* ----------------------------------------- */
-#define OCS_VX_BINARY_SEMAPHORE(x)      OCS_SEM x[1]
-#define OCS_VX_COUNTING_SEMAPHORE(x)    OCS_SEM x[1]
-#define OCS_VX_MUTEX_SEMAPHORE(x)       OCS_SEM x[1]
+#define OCS_VX_BINARY_SEMAPHORE(x)   OCS_SEM x[1]
+#define OCS_VX_COUNTING_SEMAPHORE(x) OCS_SEM x[1]
+#define OCS_VX_MUTEX_SEMAPHORE(x)    OCS_SEM x[1]
 
 /* ----------------------------------------- */
 /* types normally defined in semLib.h */
 /* ----------------------------------------- */
-typedef char OCS_SEM;
-typedef OCS_SEM* OCS_SEM_ID;
+typedef char     OCS_SEM;
+typedef OCS_SEM *OCS_SEM_ID;
 
 /*for binary semaphores */
 typedef enum
 {
     OCS_SEM_EMPTY = 0,
-    OCS_SEM_FULL =  1
+    OCS_SEM_FULL  = 1
 } OCS_SEM_B_STATE;
 
 enum
@@ -33,7 +53,6 @@ enum
     OCS_SEM_INVERSION_SAFE       = 0x8,
     OCS_SEM_EVENTSEND_ERR_NOTIFY = 0x10
 };
-
 
 /* ----------------------------------------- */
 /* prototypes normally declared in semLib.h */
@@ -51,7 +70,4 @@ extern OCS_STATUS OCS_semFlush(OCS_SEM_ID semId);
 extern OCS_STATUS OCS_semTake(OCS_SEM_ID semId, int timeout);
 extern OCS_STATUS OCS_semGive(OCS_SEM_ID semId);
 
-
-
-#endif /* _OSAL_STUB_SEMLIB_H_ */
-
+#endif /*  OCS_SEMLIB_H */

@@ -1,18 +1,26 @@
 /*
- *  Copyright (c) 2004-2018, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
- * \file osapi_stubs.c
- *
- *  Created on: Feb 25, 2015
- *      Author: joseph.p.hickey@nasa.gov
+ * \file     osapi-utstub-mutex.c
+ * \author   joseph.p.hickey@nasa.gov
  *
  * Stub implementations for the functions defined in the OSAL API
  *
@@ -22,10 +30,10 @@
  * can be executed.
  */
 
+#include "osapi-mutex.h" /* OSAL public API for this subsystem */
 #include "utstub-helpers.h"
 
-
-UT_DEFAULT_STUB(OS_MutexAPI_Init,(void))
+UT_DEFAULT_STUB(OS_MutexAPI_Init, (void))
 
 /*****************************************************************************/
 /**
@@ -50,19 +58,23 @@ UT_DEFAULT_STUB(OS_MutexAPI_Init,(void))
 **        Returns either a user-defined status flag, OS_ERROR, or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_MutSemCreate(uint32 *sem_id, const char *sem_name, uint32 options)
+int32 OS_MutSemCreate(osal_id_t *sem_id, const char *sem_name, uint32 options)
 {
+    UT_Stub_RegisterContext(UT_KEY(OS_MutSemCreate), sem_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_MutSemCreate), sem_name);
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_MutSemCreate), options);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemCreate);
 
     if (status == OS_SUCCESS)
     {
-        *sem_id = UT_AllocStubObjId(UT_OBJTYPE_MUTEX);
+        *sem_id = UT_AllocStubObjId(OS_OBJECT_TYPE_OS_MUTEX);
     }
     else
     {
-        *sem_id = 0xDEADBEEFU;
+        *sem_id = UT_STUB_FAKE_OBJECT_ID;
     }
 
     return status;
@@ -88,15 +100,17 @@ int32 OS_MutSemCreate(uint32 *sem_id, const char *sem_name, uint32 options)
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_MutSemDelete(uint32 sem_id)
+int32 OS_MutSemDelete(osal_id_t sem_id)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_MutSemDelete), sem_id);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemDelete);
 
     if (status == OS_SUCCESS)
     {
-        UT_DeleteStubObjId(UT_OBJTYPE_MUTEX, sem_id);
+        UT_DeleteStubObjId(OS_OBJECT_TYPE_OS_MUTEX, sem_id);
     }
 
     return status;
@@ -122,8 +136,10 @@ int32 OS_MutSemDelete(uint32 sem_id)
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_MutSemGive(uint32 sem_id)
+int32 OS_MutSemGive(osal_id_t sem_id)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_MutSemGive), sem_id);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemGive);
@@ -151,8 +167,10 @@ int32 OS_MutSemGive(uint32 sem_id)
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_MutSemTake(uint32 sem_id)
+int32 OS_MutSemTake(osal_id_t sem_id)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_MutSemTake), sem_id);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemTake);
@@ -165,22 +183,23 @@ int32 OS_MutSemTake(uint32 sem_id)
  * Stub function for OS_MutSemGetIdByName()
  *
  *****************************************************************************/
-int32 OS_MutSemGetIdByName (uint32 *sem_id, const char *sem_name)
+int32 OS_MutSemGetIdByName(osal_id_t *sem_id, const char *sem_name)
 {
+    UT_Stub_RegisterContext(UT_KEY(OS_MutSemGetIdByName), sem_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_MutSemGetIdByName), sem_name);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemGetIdByName);
 
     if (status == OS_SUCCESS &&
-            UT_Stub_CopyToLocal(UT_KEY(OS_MutSemGetIdByName), sem_id, sizeof(*sem_id)) < sizeof(*sem_id))
+        UT_Stub_CopyToLocal(UT_KEY(OS_MutSemGetIdByName), sem_id, sizeof(*sem_id)) < sizeof(*sem_id))
     {
-        *sem_id =  1;
-        UT_FIXUP_ID(*sem_id, UT_OBJTYPE_MUTEX);
+        UT_ObjIdCompose(1, OS_OBJECT_TYPE_OS_MUTEX, sem_id);
     }
 
     return status;
 }
-
 
 /*****************************************************************************/
 /**
@@ -198,23 +217,22 @@ int32 OS_MutSemGetIdByName (uint32 *sem_id, const char *sem_name)
 **        Returns OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_MutSemGetInfo(uint32 sem_id, OS_mut_sem_prop_t *mut_prop)
+int32 OS_MutSemGetInfo(osal_id_t sem_id, OS_mut_sem_prop_t *mut_prop)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_MutSemGetInfo), sem_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_MutSemGetInfo), mut_prop);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_MutSemGetInfo);
 
     if (status == OS_SUCCESS &&
-            UT_Stub_CopyToLocal(UT_KEY(OS_MutSemGetInfo), mut_prop, sizeof(*mut_prop)) < sizeof(*mut_prop))
+        UT_Stub_CopyToLocal(UT_KEY(OS_MutSemGetInfo), mut_prop, sizeof(*mut_prop)) < sizeof(*mut_prop))
     {
-        strncpy(mut_prop->name, "Name", OS_MAX_API_NAME - 1);
-        mut_prop->name[OS_MAX_API_NAME - 1] = '\0';
-        mut_prop->creator =  1;
-        UT_FIXUP_ID(mut_prop->creator, UT_OBJTYPE_TASK);
+        strncpy(mut_prop->name, "Name", sizeof(mut_prop->name) - 1);
+        mut_prop->name[sizeof(mut_prop->name) - 1] = '\0';
+        UT_ObjIdCompose(1, OS_OBJECT_TYPE_OS_TASK, &mut_prop->creator);
     }
 
     return status;
 }
-
-
-

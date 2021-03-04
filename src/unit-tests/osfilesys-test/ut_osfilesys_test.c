@@ -1,3 +1,23 @@
+/*
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
+ *
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 /*================================================================================*
 ** File:  ut_osfilesys_test.c
 ** Owner: Tam Ngo
@@ -14,8 +34,8 @@
 ** Macros
 **--------------------------------------------------------------------------------*/
 
-#define UT_OS_FS_BLOCK_SIZE  512
-#define UT_OS_FS_MAX_BLOCKS   20
+#define UT_OS_FS_BLOCK_SIZE 512
+#define UT_OS_FS_MAX_BLOCKS 20
 
 /*--------------------------------------------------------------------------------*
 ** Data types
@@ -29,17 +49,17 @@
 ** Global variables
 **--------------------------------------------------------------------------------*/
 
-char* g_fsAddrPtr = NULL;
+char *g_fsAddrPtr = NULL;
 
-int32 g_blkSize = UT_OS_FS_BLOCK_SIZE;
-int32 g_blkCnt  = UT_OS_FS_MAX_BLOCKS;
+size_t            g_blkSize = {UT_OS_FS_BLOCK_SIZE};
+osal_blockcount_t g_blkCnt  = {UT_OS_FS_MAX_BLOCKS};
 
-char  g_fsLongName[UT_OS_PATH_BUFF_SIZE];
-char  g_physDriveName[UT_OS_PHYS_NAME_BUFF_SIZE];
+char g_fsLongName[UT_OS_PATH_BUFF_SIZE];
+char g_physDriveName[UT_OS_PHYS_NAME_BUFF_SIZE];
 
-char  g_volNames[UT_OS_FILESYS_LIST_LEN][UT_OS_NAME_BUFF_SIZE];
-char  g_devNames[UT_OS_FILESYS_LIST_LEN][UT_OS_FILE_BUFF_SIZE];
-char  g_mntNames[UT_OS_FILESYS_LIST_LEN][UT_OS_FILE_BUFF_SIZE];
+char g_volNames[UT_OS_FILESYS_LIST_LEN][UT_OS_NAME_BUFF_SIZE];
+char g_devNames[UT_OS_FILESYS_LIST_LEN][UT_OS_FILE_BUFF_SIZE];
+char g_mntNames[UT_OS_FILESYS_LIST_LEN][UT_OS_FILE_BUFF_SIZE];
 
 /*--------------------------------------------------------------------------------*
 ** Local function prototypes
@@ -54,8 +74,8 @@ void UT_os_init_fs_misc(void);
 void UT_os_init_fs_misc()
 {
     memset(g_fsLongName, 'X', sizeof(g_fsLongName));
-    g_fsLongName[0] = '/';
-    g_fsLongName[sizeof(g_fsLongName)-1] = '\0';
+    g_fsLongName[0]                        = '/';
+    g_fsLongName[sizeof(g_fsLongName) - 1] = '\0';
 
     strcpy(g_devNames[0], "/ramdev0");
     strcpy(g_volNames[0], " ");
@@ -94,7 +114,7 @@ void UT_os_init_fs_misc()
 ** Main
 **--------------------------------------------------------------------------------*/
 
-void OS_Application_Startup(void)
+void UtTest_Setup(void)
 {
     if (OS_API_Init() != OS_SUCCESS)
     {
@@ -115,8 +135,7 @@ void OS_Application_Startup(void)
     UtTest_Add(UT_os_translatepath_test, NULL, NULL, "OS_TranslatePath (internal)");
 
     UtTest_Add(UT_os_checkfs_test, NULL, NULL, "OS_chkfs");
-    UtTest_Add(UT_os_fsblocksfree_test, NULL, NULL, "OS_fsBlocksFree");
-    UtTest_Add(UT_os_fsbytesfree_test, NULL, NULL, "OS_fsBytesFree");
+    UtTest_Add(UT_os_fsstatvolume_test, NULL, NULL, "OS_FileSysStatVolume");
 }
 
 /*================================================================================*

@@ -1,11 +1,21 @@
 /*
- *  Copyright (c) 2004-2018, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
@@ -22,8 +32,8 @@
  * can be executed.
  */
 
+#include "osapi-heap.h" /* OSAL public API for this subsystem */
 #include "utstub-helpers.h"
-
 
 /*****************************************************************************
  *
@@ -32,20 +42,20 @@
  *****************************************************************************/
 int32 OS_HeapGetInfo(OS_heap_prop_t *heap_prop)
 {
+    UT_Stub_RegisterContext(UT_KEY(OS_HeapGetInfo), heap_prop);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_HeapGetInfo);
 
     if (status == OS_SUCCESS &&
-            UT_Stub_CopyToLocal(UT_KEY(OS_HeapGetInfo), heap_prop, sizeof(*heap_prop)) < sizeof(*heap_prop))
+        UT_Stub_CopyToLocal(UT_KEY(OS_HeapGetInfo), heap_prop, sizeof(*heap_prop)) < sizeof(*heap_prop))
     {
         /* Return some random data */
-        heap_prop->free_bytes = (uint32) 12345;
-        heap_prop->free_blocks = (uint32) 6789;
-        heap_prop->largest_free_block = (uint32) 100;
+        heap_prop->free_bytes         = OSAL_SIZE_C(12345);
+        heap_prop->free_blocks        = OSAL_BLOCKCOUNT_C(6789);
+        heap_prop->largest_free_block = OSAL_SIZE_C(100);
     }
 
     return status;
 }
-
-

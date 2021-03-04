@@ -1,11 +1,21 @@
 /*
- *  Copyright (c) 2004-2018, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
@@ -22,12 +32,23 @@
  * can be executed.
  */
 
+#include "osapi-printf.h" /* OSAL public API for this subsystem */
 #include "utstub-helpers.h"
-
 
 int32 OS_ConsoleAPI_Init(void)
 {
     return UT_DEFAULT_IMPL(OS_ConsoleAPI_Init);
+}
+
+/*****************************************************************************
+ *
+ * Stub function for OS_ConsoleWrite()
+ *
+ *****************************************************************************/
+int32 OS_ConsoleWrite(uint32 console_id, const char *Str)
+{
+    UT_Stub_RegisterContext(UT_KEY(OS_ConsoleWrite), Str);
+    return UT_DEFAULT_IMPL(OS_ConsoleWrite);
 }
 
 /*****************************************************************************
@@ -37,13 +58,22 @@ int32 OS_ConsoleAPI_Init(void)
  *****************************************************************************/
 void OS_printf(const char *string, ...)
 {
-    int32   status;
-    int32   length = strlen(string);
-    va_list va;
-
-    va_start(va,string);
-
     UT_Stub_RegisterContext(UT_KEY(OS_printf), string);
+
+    int32   status;
+    size_t  length = strlen(string);
+    va_list va;
+    char    str[128];
+
+    /* Output the message when in debug mode */
+    va_start(va, string);
+    vsnprintf(str, sizeof(str), string, va);
+    UtDebug("OS_printf: %s", str);
+    va_end(va);
+
+    /* Reset va list for next use */
+    va_start(va, string);
+
     status = UT_DefaultStubImplWithArgs(__func__, UT_KEY(OS_printf), 0, va);
 
     if (status >= 0)
@@ -53,10 +83,9 @@ void OS_printf(const char *string, ...)
          * This is merely a way to avoid having to do full-blown printf processing
          * inside the UT stub (which would make it the full version, not a stub)
          */
-        if (strcmp(string, "%s") == 0 ||
-                strcmp(string, "%s\n") == 0)
+        if (strcmp(string, "%s") == 0 || strcmp(string, "%s\n") == 0)
         {
-            string = va_arg(va,const char *);
+            string = va_arg(va, const char *);
         }
         length = strlen(string);
         if (length > 0)
@@ -67,7 +96,7 @@ void OS_printf(const char *string, ...)
              *
              * (this is to ensure a consistent separator in the output buffer)
              */
-            while (length > 0 && string[length-1] == '\n')
+            while (length > 0 && string[length - 1] == '\n')
             {
                 --length;
             }
@@ -98,4 +127,3 @@ void OS_printf_enable(void)
 {
     UT_DEFAULT_IMPL(OS_printf_enable);
 }
-

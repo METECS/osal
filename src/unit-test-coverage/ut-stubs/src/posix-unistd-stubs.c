@@ -1,11 +1,21 @@
 /*
- *      Copyright (c) 2019, United States government as represented by the
- *      administrator of the National Aeronautics Space Administration.
- *      All rights reserved. This software was created at NASA Goddard
- *      Space Flight Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *      This is governed by the NASA Open Source Agreement and may be used,
- *      distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /* OSAL coverage stub replacement for unistd.h */
@@ -15,11 +25,9 @@
 
 #include <OCS_unistd.h>
 
+#define OCS_MAX_RDWR_SIZE 0x01000000 /* 16MB */
 
-#define OCS_MAX_RDWR_SIZE       0x01000000  /* 16MB */
-
-
-int OCS_close (int fd)
+int OCS_close(int fd)
 {
     int32 Status;
 
@@ -28,8 +36,7 @@ int OCS_close (int fd)
     return Status;
 }
 
-
-OCS_gid_t OCS_getegid (void)
+OCS_gid_t OCS_getegid(void)
 {
     int32 Status;
 
@@ -38,8 +45,7 @@ OCS_gid_t OCS_getegid (void)
     return Status;
 }
 
-
-OCS_uid_t OCS_geteuid (void)
+OCS_uid_t OCS_geteuid(void)
 {
     int32 Status;
 
@@ -48,8 +54,7 @@ OCS_uid_t OCS_geteuid (void)
     return Status;
 }
 
-
-long int OCS_gethostid (void)
+long int OCS_gethostid(void)
 {
     int32 Status;
 
@@ -58,8 +63,7 @@ long int OCS_gethostid (void)
     return Status;
 }
 
-
-int OCS_gethostname (char * name, size_t len)
+int OCS_gethostname(char *name, size_t len)
 {
     int32 Status;
 
@@ -67,15 +71,14 @@ int OCS_gethostname (char * name, size_t len)
 
     if (Status == 0 && len > 0)
     {
-        strncpy(name, "ut", len-1);
-        name[len-1] = 0;
+        strncpy(name, "ut", len - 1);
+        name[len - 1] = 0;
     }
 
     return Status;
 }
 
-
-OCS_pid_t OCS_getpid (void)
+OCS_pid_t OCS_getpid(void)
 {
     int32 Status;
 
@@ -84,8 +87,7 @@ OCS_pid_t OCS_getpid (void)
     return Status;
 }
 
-
-OCS_off_t OCS_lseek (int fd, OCS_off_t offset, int whence)
+OCS_off_t OCS_lseek(int fd, OCS_off_t offset, int whence)
 {
     int32 Status;
 
@@ -94,11 +96,10 @@ OCS_off_t OCS_lseek (int fd, OCS_off_t offset, int whence)
     return Status;
 }
 
-
-OCS_ssize_t OCS_read (int fd, void * buf, size_t n)
+OCS_ssize_t OCS_read(int fd, void *buf, size_t n)
 {
-    int32 Status;
-    uint32 CopySize;
+    int32  Status;
+    size_t CopySize;
 
     Status = UT_DEFAULT_IMPL_RC(OCS_read, OCS_MAX_RDWR_SIZE);
 
@@ -137,8 +138,7 @@ OCS_ssize_t OCS_read (int fd, void * buf, size_t n)
     return Status;
 }
 
-
-int OCS_rmdir (const char * path)
+int OCS_rmdir(const char *path)
 {
     int32 Status;
 
@@ -147,8 +147,7 @@ int OCS_rmdir (const char * path)
     return Status;
 }
 
-
-long int OCS_sysconf (int name)
+long int OCS_sysconf(int name)
 {
     int32 Status;
 
@@ -157,11 +156,10 @@ long int OCS_sysconf (int name)
     return Status;
 }
 
-
-OCS_ssize_t OCS_write (int fd, const void * buf, size_t n)
+OCS_ssize_t OCS_write(int fd, const void *buf, size_t n)
 {
-    int32 Status;
-    uint32 CopySize;
+    int32  Status;
+    size_t CopySize;
 
     Status = UT_DEFAULT_IMPL_RC(OCS_write, OCS_MAX_RDWR_SIZE);
 
@@ -190,5 +188,3 @@ OCS_ssize_t OCS_write (int fd, const void * buf, size_t n)
 
     return Status;
 }
-
-

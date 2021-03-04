@@ -1,11 +1,21 @@
 /*
- *  Copyright (c) 2004-2018, United States government as represented by the
- *  administrator of the National Aeronautics Space Administration.
- *  All rights reserved. This software was created at NASA Glenn
- *  Research Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *  This is governed by the NASA Open Source Agreement and may be used,
- *  distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /**
@@ -22,10 +32,10 @@
  * can be executed.
  */
 
+#include "osapi-module.h" /* OSAL public API for this subsystem */
 #include "utstub-helpers.h"
 
-
-UT_DEFAULT_STUB(OS_ModuleAPI_Init,(void))
+UT_DEFAULT_STUB(OS_ModuleAPI_Init, (void))
 
 /*****************************************************************************/
 /**
@@ -51,8 +61,6 @@ int32 dummy_function(void)
     return status;
 }
 
-
-
 /*****************************************************************************/
 /**
 ** \brief OS_ModuleLoad stub function
@@ -73,19 +81,24 @@ int32 dummy_function(void)
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_ModuleLoad(uint32 *module_id, const char *module_name, const char *filename)
+int32 OS_ModuleLoad(osal_id_t *module_id, const char *module_name, const char *filename, uint32 flags)
 {
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleLoad), module_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleLoad), module_name);
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleLoad), filename);
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_ModuleLoad), flags);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_ModuleLoad);
 
     if (status == OS_SUCCESS)
     {
-        *module_id = UT_AllocStubObjId(UT_OBJTYPE_MODULE);
+        *module_id = UT_AllocStubObjId(OS_OBJECT_TYPE_OS_MODULE);
     }
     else
     {
-        *module_id = 0xDEADBEEFU;
+        *module_id = UT_STUB_FAKE_OBJECT_ID;
     }
 
     return status;
@@ -111,15 +124,17 @@ int32 OS_ModuleLoad(uint32 *module_id, const char *module_name, const char *file
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_ModuleUnload(uint32 module_id)
+int32 OS_ModuleUnload(osal_id_t module_id)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_ModuleUnload), module_id);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_ModuleUnload);
 
     if (status == OS_SUCCESS)
     {
-        UT_DeleteStubObjId(UT_OBJTYPE_MODULE, module_id);
+        UT_DeleteStubObjId(OS_OBJECT_TYPE_OS_MODULE, module_id);
     }
 
     return status;
@@ -145,14 +160,17 @@ int32 OS_ModuleUnload(uint32 module_id)
 **        Returns either a user-defined status flag or OS_SUCCESS.
 **
 ******************************************************************************/
-int32 OS_ModuleInfo(uint32 module_id, OS_module_prop_t *module_info)
+int32 OS_ModuleInfo(osal_id_t module_id, OS_module_prop_t *module_info)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_ModuleInfo), module_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleInfo), module_info);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_ModuleInfo);
 
     if (status == OS_SUCCESS &&
-            UT_Stub_CopyToLocal(UT_KEY(OS_ModuleInfo), module_info, sizeof(*module_info)) < sizeof(*module_info))
+        UT_Stub_CopyToLocal(UT_KEY(OS_ModuleInfo), module_info, sizeof(*module_info)) < sizeof(*module_info))
     {
         memset(module_info, 0, sizeof(*module_info));
     }
@@ -182,13 +200,14 @@ int32 OS_ModuleInfo(uint32 module_id, OS_module_prop_t *module_info)
 ******************************************************************************/
 int32 OS_SymbolLookup(cpuaddr *symbol_address, const char *symbol_name)
 {
+    UT_Stub_RegisterContext(UT_KEY(OS_SymbolLookup), symbol_address);
+    UT_Stub_RegisterContext(UT_KEY(OS_SymbolLookup), symbol_name);
+
     int32 status;
 
     /*
      * Register the context so a hook can do something with the parameters
      */
-    UT_Stub_RegisterContext(UT_KEY(OS_SymbolLookup), symbol_address);
-    UT_Stub_RegisterContext(UT_KEY(OS_SymbolLookup), symbol_name);
 
     status = UT_DEFAULT_IMPL(OS_SymbolLookup);
 
@@ -196,10 +215,11 @@ int32 OS_SymbolLookup(cpuaddr *symbol_address, const char *symbol_name)
     {
         *symbol_address = 0xDEADBEEFU;
     }
-    else if (UT_Stub_CopyToLocal(UT_KEY(OS_SymbolLookup), symbol_address, sizeof(*symbol_address)) < sizeof(*symbol_address))
+    else if (UT_Stub_CopyToLocal(UT_KEY(OS_SymbolLookup), symbol_address, sizeof(*symbol_address)) <
+             sizeof(*symbol_address))
     {
         /* return the dummy function when test didn't register anything else */
-        *symbol_address = (cpuaddr) &dummy_function;
+        *symbol_address = (cpuaddr)&dummy_function;
     }
 
     return status;
@@ -210,8 +230,44 @@ int32 OS_SymbolLookup(cpuaddr *symbol_address, const char *symbol_name)
  * Stub function for OS_SymbolTableDump()
  *
  *****************************************************************************/
-int32 OS_SymbolTableDump ( const char *filename, uint32 SizeLimit )
+int32 OS_ModuleSymbolLookup(osal_id_t module_id, cpuaddr *symbol_address, const char *symbol_name)
 {
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_ModuleSymbolLookup), module_id);
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleSymbolLookup), symbol_address);
+    UT_Stub_RegisterContext(UT_KEY(OS_ModuleSymbolLookup), symbol_name);
+
+    int32 status;
+
+    /*
+     * Register the context so a hook can do something with the parameters
+     */
+
+    status = UT_DEFAULT_IMPL(OS_ModuleSymbolLookup);
+
+    if (status != OS_SUCCESS)
+    {
+        *symbol_address = 0xDEADBEEFU;
+    }
+    else if (UT_Stub_CopyToLocal(UT_KEY(OS_ModuleSymbolLookup), symbol_address, sizeof(*symbol_address)) <
+             sizeof(*symbol_address))
+    {
+        /* return the dummy function when test didn't register anything else */
+        *symbol_address = (cpuaddr)&dummy_function;
+    }
+
+    return status;
+}
+
+/*****************************************************************************
+ *
+ * Stub function for OS_SymbolTableDump()
+ *
+ *****************************************************************************/
+int32 OS_SymbolTableDump(const char *filename, size_t size_limit)
+{
+    UT_Stub_RegisterContext(UT_KEY(OS_SymbolTableDump), filename);
+    UT_Stub_RegisterContextGenericArg(UT_KEY(OS_SymbolTableDump), size_limit);
+
     int32 status;
 
     status = UT_DEFAULT_IMPL(OS_SymbolTableDump);

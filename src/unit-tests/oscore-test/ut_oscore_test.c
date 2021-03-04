@@ -1,3 +1,23 @@
+/*
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
+ *
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 /*================================================================================*
 ** File:  ut_oscore_test.c
 ** Owner: Tam Ngo/Alan Cudmore
@@ -26,8 +46,8 @@
 ** Global variables
 **--------------------------------------------------------------------------------*/
 
-const char* g_task_names[UT_OS_TASK_LIST_LEN];
-char  g_long_task_name[UT_OS_NAME_BUFF_SIZE];
+const char *g_task_names[UT_OS_TASK_LIST_LEN];
+char        g_long_task_name[UT_OS_NAME_BUFF_SIZE];
 
 /*--------------------------------------------------------------------------------*
 ** External function prototypes
@@ -56,7 +76,7 @@ void UT_os_init_task_get_info_test(void);
 void UT_os_init_task_misc()
 {
     memset(g_long_task_name, 'X', sizeof(g_long_task_name));
-    g_long_task_name[sizeof(g_long_task_name)-1] = '\0';
+    g_long_task_name[sizeof(g_long_task_name) - 1] = '\0';
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -166,7 +186,7 @@ void UT_os_init_task_get_info_test()
 ** Main
 **--------------------------------------------------------------------------------*/
 
-void OS_Application_Startup(void)
+void UtTest_Setup(void)
 {
     UtTest_Add(UT_os_apiinit_test, NULL, NULL, "OS_API_Init");
 
@@ -205,82 +225,29 @@ void OS_Application_Startup(void)
     UtTest_Add(UT_os_queue_get_id_by_name_test, NULL, NULL, "OS_QueueGetIdByName");
     UtTest_Add(UT_os_queue_get_info_test, NULL, NULL, "OS_QueueGetInfo");
 
-    UtTest_Add(
-            NULL,
-            UT_os_init_task_misc,
-            NULL,
-            "UT_os_init_task_misc");
-    UtTest_Add(
-            UT_os_task_create_test,
-            UT_os_init_task_create_test,
-            NULL,
-            "OS_TaskCreate");
-    UtTest_Add(
-            UT_os_task_delete_test,
-            UT_os_init_task_delete_test,
-            NULL,
-            "OS_TaskDelete");
-    UtTest_Add(
-            UT_os_task_install_delete_handler_test,
-            UT_os_setup_install_delete_handler_test,
-            NULL,
-            "OS_TaskInstallDeleteHandler");
-    UtTest_Add(
-            UT_os_task_exit_test,
-            UT_os_init_task_exit_test,
-            NULL,
-            "OS_TaskExit");
-    UtTest_Add(
-            UT_os_task_delay_test,
-            UT_os_init_task_delay_test,
-            NULL,
-            "OS_TaskDelay");
-    UtTest_Add(
-            UT_os_task_set_priority_test,
-            UT_os_init_task_set_priority_test,
-            NULL,
-            "OS_TaskSetPriority");
-    UtTest_Add(
-            UT_os_task_register_test,
-            UT_os_init_task_register_test,
-            NULL,
-            "OS_TaskRegister");
-    UtTest_Add(
-            UT_os_task_get_id_test,
-            UT_os_init_task_get_id_test,
-            NULL,
-            "OS_TaskGetId");
-    UtTest_Add(
-            UT_os_task_get_id_by_name_test,
-            UT_os_init_task_get_id_by_name_test,
-            NULL,
-            "OS_TaskGetIdByName");
-    UtTest_Add(
-            UT_os_task_get_info_test,
-            UT_os_init_task_get_info_test,
-            NULL,
-            "OS_TaskGetInfo");
+    UtTest_Add(UT_os_select_fd_test, NULL, NULL, "OS_SelectFd");
+    UtTest_Add(UT_os_select_single_test, NULL, NULL, "OS_SelectSingle");
+    UtTest_Add(UT_os_select_multi_test, NULL, NULL, "OS_SelectMultiple");
+
+    UtTest_Add(NULL, UT_os_init_task_misc, NULL, "UT_os_init_task_misc");
+    UtTest_Add(UT_os_task_create_test, UT_os_init_task_create_test, NULL, "OS_TaskCreate");
+    UtTest_Add(UT_os_task_delete_test, UT_os_init_task_delete_test, NULL, "OS_TaskDelete");
+    UtTest_Add(UT_os_task_install_delete_handler_test, UT_os_setup_install_delete_handler_test, NULL,
+               "OS_TaskInstallDeleteHandler");
+    UtTest_Add(UT_os_task_exit_test, UT_os_init_task_exit_test, NULL, "OS_TaskExit");
+    UtTest_Add(UT_os_task_delay_test, UT_os_init_task_delay_test, NULL, "OS_TaskDelay");
+    UtTest_Add(UT_os_task_set_priority_test, UT_os_init_task_set_priority_test, NULL, "OS_TaskSetPriority");
+    UtTest_Add(UT_os_task_register_test, UT_os_init_task_register_test, NULL, "OS_TaskRegister");
+    UtTest_Add(UT_os_task_get_id_test, UT_os_init_task_get_id_test, NULL, "OS_TaskGetId");
+    UtTest_Add(UT_os_task_get_id_by_name_test, UT_os_init_task_get_id_by_name_test, NULL, "OS_TaskGetIdByName");
+    UtTest_Add(UT_os_task_get_info_test, UT_os_init_task_get_info_test, NULL, "OS_TaskGetInfo");
 
     UtTest_Add(UT_os_geterrorname_test, NULL, NULL, "OS_GetErrorName");
-
-    UtTest_Add(UT_os_tick2micros_test, NULL, NULL, "OS_Tick2Micros");
-    UtTest_Add(UT_os_milli2ticks_test, NULL, NULL, "OS_Milli2Ticks");
 
     UtTest_Add(UT_os_getlocaltime_test, NULL, NULL, "OS_GetLocalTime");
     UtTest_Add(UT_os_setlocaltime_test, NULL, NULL, "OS_SetLocalTime");
 
     UtTest_Add(UT_os_heapgetinfo_test, NULL, NULL, "OS_HeapGetInfo");
-
-    UtTest_Add(UT_os_int_attachhandler_test, NULL, NULL, "OS_IntAttachHandler");
-    UtTest_Add(UT_os_int_enable_test, NULL, NULL, "OS_IntEnable");
-    UtTest_Add(UT_os_int_disable_test, NULL, NULL, "OS_IntDisable");
-    UtTest_Add(UT_os_int_lock_test, NULL, NULL, "OS_IntLock");
-    UtTest_Add(UT_os_int_unlock_test, NULL, NULL, "OS_IntUnlock");
-
-    UtTest_Add(UT_os_fpuexc_setmask_test, NULL, NULL, "OS_FPUExcSetMask");
-    UtTest_Add(UT_os_fpuexc_getmask_test, NULL, NULL, "OS_FPUExcGetMask");
-
-
 }
 
 /*================================================================================*

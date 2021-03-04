@@ -1,11 +1,21 @@
 /*
- *      Copyright (c) 2019, United States government as represented by the
- *      administrator of the National Aeronautics Space Administration.
- *      All rights reserved. This software was created at NASA Goddard
- *      Space Flight Center pursuant to government contracts.
+ *  NASA Docket No. GSC-18,370-1, and identified as "Operating System Abstraction Layer"
  *
- *      This is governed by the NASA Open Source Agreement and may be used,
- *      distributed and modified only according to the terms of that agreement.
+ *  Copyright (c) 2019 United States Government as represented by
+ *  the Administrator of the National Aeronautics and Space Administration.
+ *  All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 /* OSAL coverage stub replacement for stdlib.h */
@@ -25,18 +35,16 @@
  * it only allocates sequential blocks and does not recover
  * the space after free.
  */
-#define MPOOL_START_SIGNATURE       0x8a458c6b
-#define MPOOL_BLOCK_SIGNATURE       0x3ef65721
-#define MPOOL_ALIGN                 16
+#define MPOOL_START_SIGNATURE 0x8a458c6b
+#define MPOOL_BLOCK_SIGNATURE 0x3ef65721
+#define MPOOL_ALIGN           16
 
 struct MPOOL_REC
 {
     cpuaddr BlockAddr;
-    uint32 Magic;
-    uint32 Size;
+    uint32  Magic;
+    uint32  Size;
 };
-
-
 
 void OCS_exit(int c)
 {
@@ -51,9 +59,16 @@ void OCS_exit(int c)
      */
 }
 
-unsigned long int OCS_strtoul (const char * nptr, char ** endptr, int base)
+void OCS_abort(void)
 {
-    int32 Status;
+    UT_DEFAULT_IMPL(OCS_abort);
+
+    /* Note - same issue as with OCS_exit() - this isn't supposed to return */
+}
+
+unsigned long int OCS_strtoul(const char *nptr, char **endptr, int base)
+{
+    int32         Status;
     unsigned long Result = 0;
 
     Status = UT_DEFAULT_IMPL_RC(OCS_strtoul, -1);
@@ -69,46 +84,45 @@ unsigned long int OCS_strtoul (const char * nptr, char ** endptr, int base)
     }
 
     return Result;
-
 }
 
-int OCS_system (const char * command)
+int OCS_system(const char *command)
 {
     return UT_DEFAULT_IMPL(OCS_system);
 }
 
 void *OCS_malloc(size_t sz)
 {
-    int32 Status;
-    void *PoolPtr;
-    cpuaddr PoolStart;
-    cpuaddr PoolEnd;
-    cpuaddr NextBlock;
-    size_t NextSize;
-    uint32 PoolSize;
-    uint32 CallCnt;
+    int32             Status;
+    void *            PoolPtr;
+    cpuaddr           PoolStart;
+    cpuaddr           PoolEnd;
+    cpuaddr           NextBlock;
+    size_t            NextSize;
+    size_t            PoolSize;
+    uint32            CallCnt;
     struct MPOOL_REC *Rec;
 
-    Rec = NULL;
+    Rec     = NULL;
     CallCnt = UT_GetStubCount(UT_KEY(OCS_malloc));
     UT_GetDataBuffer(UT_KEY(OCS_malloc), &PoolPtr, &PoolSize, NULL);
 
     if (PoolPtr != NULL)
     {
         PoolStart = (cpuaddr)PoolPtr;
-        PoolEnd = PoolStart + PoolSize;
+        PoolEnd   = PoolStart + PoolSize;
         PoolStart = (PoolStart + MPOOL_ALIGN - 1) & ~((cpuaddr)MPOOL_ALIGN - 1);
-        PoolSize = PoolEnd - PoolStart;
+        PoolSize  = PoolEnd - PoolStart;
 
         if (PoolSize > (MPOOL_ALIGN * 2))
         {
-            Rec = (struct MPOOL_REC*)PoolStart;
+            Rec       = (struct MPOOL_REC *)PoolStart;
             NextBlock = PoolStart + MPOOL_ALIGN;
             PoolSize -= MPOOL_ALIGN;
             if (CallCnt == 0)
             {
-                Rec->Magic = MPOOL_START_SIGNATURE;
-                Rec->Size = 0;
+                Rec->Magic     = MPOOL_START_SIGNATURE;
+                Rec->Size      = 0;
                 Rec->BlockAddr = NextBlock;
             }
             else if (Rec->Magic != MPOOL_START_SIGNATURE)
@@ -138,25 +152,25 @@ void *OCS_malloc(size_t sz)
         return NULL;
     }
 
-    NextSize = (NextSize + MPOOL_ALIGN - 1) & ~((size_t)MPOOL_ALIGN);
+    NextSize  = (NextSize + MPOOL_ALIGN - 1) & ~((size_t)MPOOL_ALIGN);
     NextBlock = Rec->BlockAddr + MPOOL_ALIGN;
     Rec->BlockAddr += NextSize;
     Rec->Size += NextSize;
 
-    Rec = (struct MPOOL_REC*)(NextBlock - sizeof(struct MPOOL_REC));
+    Rec            = (struct MPOOL_REC *)(NextBlock - sizeof(struct MPOOL_REC));
     Rec->BlockAddr = NextBlock;
-    Rec->Magic = MPOOL_BLOCK_SIGNATURE;
-    Rec->Size = sz;
+    Rec->Magic     = MPOOL_BLOCK_SIGNATURE;
+    Rec->Size      = sz;
 
-    return ((void*)NextBlock);
+    return ((void *)NextBlock);
 }
 
 void OCS_free(void *ptr)
 {
-    int32 Status;
-    cpuaddr BlockAddr;
-    void *PoolPtr;
-    uint32 PoolSize;
+    int32             Status;
+    cpuaddr           BlockAddr;
+    void *            PoolPtr;
+    size_t            PoolSize;
     struct MPOOL_REC *Rec;
 
     /*
@@ -175,7 +189,7 @@ void OCS_free(void *ptr)
         }
         else
         {
-            Rec = (struct MPOOL_REC*)(BlockAddr - sizeof(struct MPOOL_REC));
+            Rec = (struct MPOOL_REC *)(BlockAddr - sizeof(struct MPOOL_REC));
             if (Rec->Magic == MPOOL_BLOCK_SIGNATURE)
             {
                 Rec->Magic = ~MPOOL_BLOCK_SIGNATURE;
@@ -190,8 +204,4 @@ void OCS_free(void *ptr)
             }
         }
     }
-
-
 }
-
-
